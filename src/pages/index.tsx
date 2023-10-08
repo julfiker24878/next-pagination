@@ -2,10 +2,22 @@ import Head from 'next/head'
 import Image from 'next/image'
 import { Inter } from 'next/font/google'
 import styles from '@/styles/Home.module.css'
+import Pagination from "../../src/components/Pagination";
+import { useState, useEffect } from "react";
+import { paginate } from "../../src/helpers/paginate";
 
 const inter = Inter({ subsets: ['latin'] })
 
-export default function Home() {
+export default function Home({ data }) {
+
+  console.log("DATA FROM HOME", data)
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+
+  const onPageChange = (page) => {
+    setCurrentPage(page);
+  };
   return (
     <>
       <Head>
@@ -16,9 +28,30 @@ export default function Home() {
       </Head>
       <main className={`${styles.main} ${inter.className}`}>
         <div className={styles.description}>
-          
+          <ul>
+            {data.map((item) => {
+              return (
+                <li key={item.id}><h2>{item.title}</h2></li>
+              )
+            })}
+          </ul>
+          <Pagination
+            items={data.length} // 100
+            currentPage={currentPage} // 1
+            pageSize={pageSize} // 10
+            onPageChange={onPageChange}
+          />
         </div>
       </main>
     </>
   )
 }
+
+export const getStaticProps = async () => {
+  const res = await fetch("https://jsonplaceholder.typicode.com/todos");
+  const data = await res.json();
+
+  return {
+    props: { data },
+  };
+};
